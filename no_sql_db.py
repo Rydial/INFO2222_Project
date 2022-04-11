@@ -51,15 +51,33 @@ class DB():
     def __init__(self):
         self.tables = {}
 
-        # Setup your tables
-        self.add_table('users', "id", "username", "password")
+        # Read Data from Database CSV File
+        self.read_database()
         
+        return
+    
+    def read_database(self):
+
+        # Open the Database CSV File (Closes Automatically)
+        with open("database.csv", "a+") as file:
+
+            # Create a new Table Entry "users" in the Database
+            self.add_table("users", "username", "password")
+
+            # Set File Pointer to the Beginning of the File
+            file.seek(0)
+
+            # Create each 'entry' into the "users" Table
+            for entry in file.readlines():
+                self.create_table_entry("users", entry.strip().split(","))
+
         return
 
     def add_table(self, table_name, *table_fields):
         '''
             Adds a table to the database
         '''
+        
         table = Table(table_name, *table_fields)
         self.tables[table_name] = table
 

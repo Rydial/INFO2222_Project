@@ -7,6 +7,7 @@
 '''
 import view
 import random
+from no_sql_db import database
 
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
@@ -47,14 +48,15 @@ def login_check(username, password):
         Returns either a view for valid credentials, or a view for invalid credentials
     '''
 
-    # By default assume good creds
+    # By defaule assume good credentials
     login = True
+    # Search for Username in the Database
+    entry = database.search_table("users", "username", username)
     
-    if username != "admin": # Wrong Username
-        err_str = "Incorrect Username"
+    if entry is None: # Wrong Username
+        err_str = f"Incorrect Username: {username}"
         login = False
-    
-    if password != "password": # Wrong password
+    elif password != entry[1]: # Wrong password
         err_str = "Incorrect Password"
         login = False
         
