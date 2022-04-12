@@ -44,7 +44,12 @@ def run_server():
         run_server
         Runs a bottle server
     '''
-    run(host=host, port=port, debug=debug)
+    run(
+        host=host,
+        port=port,
+        debug=debug,
+        keyfile="certs/info2222_project.key",
+        certfile="certs/info2222_project.crt")
 
 #-----------------------------------------------------------------------------
 # Optional SQL support

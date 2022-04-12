@@ -87,6 +87,18 @@ def get_login_controller():
 
 #-----------------------------------------------------------------------------
 
+# Display the register page
+@get('/register')
+def get_register_controller():
+    '''
+        get_register
+        
+        Serves the register page
+    '''
+    return model.register_form()
+
+#-----------------------------------------------------------------------------
+
 # Attempt the login
 @post('/login')
 def post_login():
