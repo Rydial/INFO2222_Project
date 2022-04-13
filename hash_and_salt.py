@@ -15,7 +15,7 @@ password = "user_created_password"
 # Hash the Password with the generated Salt
 hash = hashlib.pbkdf2_hmac(
     "sha256",                   # Hash Digest Algorithm
-    password.encode("utf-8"),   # Password conversion to Bytes
+    password.encode("utf-8"),   # Password converted to Bytes
     salt,                       # Salt
     100000,                     # 100,000 iterations of SHA-256
     dklen=128                   # Get a 128 byte hash/key 
