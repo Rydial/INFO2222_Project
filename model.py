@@ -7,10 +7,14 @@
 '''
 import view
 import random
-from no_sql_db import database
+# from no_sql_db import database
+import sql
 
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
+sql = sql.SQLDatabase("users.db")
+sql.database_setup()
+
 
 #-----------------------------------------------------------------------------
 # Index
@@ -32,7 +36,7 @@ def login_form():
         login_form
         Returns the view for the login_form
     '''
-    return page_view("login")
+    return page_view("old_login")
 
 #-----------------------------------------------------------------------------
 # Register
@@ -62,18 +66,28 @@ def login_check(username, password):
     # By defaule assume good credentials
     login = True
     # Search for Username in the Database
-    entry = database.search_table("users", "username", username)
+    # entry = database.search_table("users", "username", username)
     
-    if entry is None: # Wrong Username
-        err_str = f"Incorrect Username: {username}"
-        login = False
-    elif password != entry[1]: # Wrong password
-        err_str = "Incorrect Password"
+    # if entry is None: # Wrong Username
+    #     err_str = f"Incorrect Username: {username}"
+    #     login = False
+    # elif password != entry[1]: # Wrong password
+    #     err_str = "Incorrect Password"
+    #     login = False
+
+    if sql.check_credentials(username, password) == False:
+        err_str = "Incorrect Username or Passwod"
         login = False
         
     if login: 
+        global current_user
+        current_user = username
+        print(current_user)
+        print("wtafa")
+        # sql.login(username)
         return page_view("valid", name=username)
     else:
+        print(err_str)
         return page_view("invalid", reason=err_str)
 
 #-----------------------------------------------------------------------------

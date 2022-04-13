@@ -7,6 +7,10 @@
 from bottle import route, get, post, error, request, static_file
 
 import model
+import sql
+
+sql = sql.SQLDatabase("users.db")
+sql.database_setup()
 
 #-----------------------------------------------------------------------------
 # Static file paths
