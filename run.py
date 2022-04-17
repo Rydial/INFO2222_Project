@@ -48,8 +48,10 @@ def run_server():
         host=host,
         port=port,
         debug=debug,
-        keyfile="certs/info2222_project.key",
-        certfile="certs/info2222_project.crt")
+        server="gunicorn",
+        reloader=1,
+        keyfile="certs/info2222.test..key",
+        certfile="certs/info2222.test..crt")
 
 #-----------------------------------------------------------------------------
 # Optional SQL support
