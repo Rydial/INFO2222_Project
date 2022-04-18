@@ -50,6 +50,28 @@ def register_form():
     return page_view("register")
 
 #-----------------------------------------------------------------------------
+# Message
+#-----------------------------------------------------------------------------
+
+def message_form():
+    '''
+        message_form
+        Returns the view for the message_form
+    '''
+    return page_view("message")
+
+#-----------------------------------------------------------------------------
+# Message Sent
+#-----------------------------------------------------------------------------
+
+def message_sent():
+    '''
+        message_sent
+        Returns the view for a successful message submission
+    '''
+    return page_view("message_sent")
+
+#-----------------------------------------------------------------------------
 
 # Check the login credentials
 def login_check(username, password):
