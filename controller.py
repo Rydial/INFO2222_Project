@@ -103,6 +103,18 @@ def get_register_controller():
 
 #-----------------------------------------------------------------------------
 
+@post("/register")
+def post_register_controller():
+
+    username = request.forms.get("username")
+    pwd = request.forms.get("pwd")
+    pwd2 = request.forms.get("pwd2")
+    # Call the appropriate method
+    return model.register_success(username, pwd, pwd2)
+
+#-----------------------------------------------------------------------------
+
+
 # Display the message page
 @get('/message')
 def get_message_controller():

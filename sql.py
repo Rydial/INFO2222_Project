@@ -151,7 +151,7 @@ class SQLDatabase():
             
         # Display data
         print('\nData in USER table:')
-        data=cursor.execute("""SELECT * FROM USERS""")
+        data=cursor.execute("""SELECT * FROM USERS WHERE username=?""", (username,))
         for row in data:
             
             print(row[2])
@@ -170,6 +170,9 @@ class SQLDatabase():
 
             if (input_hash == row[2]):
                 print("SUCCESSLY VERIFIED")
+            else:
+                print("NOT VERIFIED")
+
 
             print("P\n")            
        
