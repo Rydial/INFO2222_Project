@@ -1,1 +1,1 @@
-//window.alert("JS TEST!")
+// window.alert("JS TEST!")

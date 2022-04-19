@@ -53,7 +53,7 @@ class SQLDatabase():
 
         with open('salt.txt', mode='rb') as file: # b is important -> binary
             salt = file.read()
-            print(salt)
+            # print(salt)
         # salt = os.urandom(32)
 
 
@@ -113,13 +113,13 @@ class SQLDatabase():
             f.write(hashed)
         
         sql_cmd = sql_cmd.format(username=username, password=password, hashed = hashed, admin=admin)
-        print(hashed)
+        # print(hashed)
         self.execute(sql_cmd)
 
-        print("a\n")
+        # print("a\n")
         self.cur.execute("""
             UPDATE users SET hashed = ? WHERE username=?""", (memoryview(hashed).tobytes(),username) )
-        print("9\n")
+        # print("9\n")
         self.commit()
         return True
 

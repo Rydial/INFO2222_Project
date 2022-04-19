@@ -61,17 +61,6 @@ def message_form():
     return page_view("message")
 
 #-----------------------------------------------------------------------------
-# Message Sent
-#-----------------------------------------------------------------------------
-
-def message_sent():
-    '''
-        message_sent
-        Returns the view for a successful message submission
-    '''
-    return page_view("message_sent")
-
-#-----------------------------------------------------------------------------
 
 # Check the login credentials
 def login_check(username, password):
