@@ -7,6 +7,7 @@
 '''
 import view
 import random
+import hashlib
 # from no_sql_db import database
 import sql
 
@@ -48,6 +49,38 @@ def register_form():
         Returns the view for the register_form
     '''
     return page_view("register")
+
+
+#-----------------------------------------------------------------------------
+
+def register_success(name, pwd, pwd2):
+
+    with open('salt.txt', mode='rb') as file: # b is important -> binary
+        salt = file.read()
+        # print(salt)
+    # salt = os.urandom(32)
+
+
+    # Hash the Password with the generated Salt
+    phash = hashlib.pbkdf2_hmac(
+        "sha256",                   # Hash Digest Algorithm
+        pwd.encode("utf-8"),   # Password converted to Bytes
+        salt,                       # Salt
+        100000,                     # 100,000 iterations of SHA-256
+        dklen=128                   # Get a 128 byte hash/key 
+    )
+
+    print(name)
+    print(pwd)
+
+    if pwd != pwd2:
+        return page_view("register", reason="Passwords are not the same, please try again")
+
+    if sql.add_user(name, pwd , phash , admin=1) == True:
+        print("in")
+        return page_view("register_success")
+    else:
+        return page_view("register", reason="Your username exists already. Please select a new one")
 
 #-----------------------------------------------------------------------------
 
