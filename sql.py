@@ -69,6 +69,8 @@ class SQLDatabase():
 
         # Clear the database if needed
         self.execute("DROP TABLE IF EXISTS Users")
+        self.execute("DROP TABLE IF EXISTS friendships")
+
         self.commit()
 
         # Create the users table
@@ -77,6 +79,13 @@ class SQLDatabase():
             password TEXT,
             hashed BLOB,
             admin INTEGER DEFAULT 0
+        )""")
+
+        self.execute( """CREATE TABLE friendships(
+            friendship_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user1 VARCHAR(50) NOT NULL,
+            user2 VARCHAR(50) NOT NULL
+            
         )""")
 
         self.commit()
@@ -89,6 +98,8 @@ class SQLDatabase():
         # print("\n\n\n\n\n")
         # Add our admin user
         self.add_user('a', 'a', phash , admin=1)
+        # self.add_user('b', 'b', phash , admin=1)
+
 
         # print(hash2)
 
@@ -144,10 +155,10 @@ class SQLDatabase():
             print(salt)
         
         # Display columns
-        # print('\nColumns in EMPLOYEE table:')
-        # data=cursor.execute('''SELECT * FROM EMPLOYEE''')
-        # for column in data.description:
-        #     print(column[0])
+        print('\nColumns in EMPLOYEE table:')
+        data=cursor.execute('''SELECT * FROM USERS''')
+        for column in data:
+            print(column)
             
         # Display data
         print('\nData in USER table:')
@@ -170,8 +181,14 @@ class SQLDatabase():
 
             if (input_hash == row[2]):
                 print("SUCCESSLY VERIFIED")
+                conn.commit()
+                conn.close()
+                return True
             else:
                 print("NOT VERIFIED")
+                conn.commit()
+                conn.close()
+                return False
 
 
             print("P\n")            
@@ -182,19 +199,19 @@ class SQLDatabase():
         # Closing the connection
         conn.close()
 
+        return False
         
-        
-        sql_query = """
-                SELECT 1 
-                FROM Users
-                WHERE username = '{username}' AND password = '{password}'
-            """
+        # sql_query = """
+        #         SELECT 1 
+        #         FROM Users
+        #         WHERE username = '{username}' AND password = '{password}'
+        #     """
 
-        sql_query = sql_query.format(username=username, password=password)
-        self.execute(sql_query)
+        # sql_query = sql_query.format(username=username, password=password)
+        # self.execute(sql_query)
 
-        # If our query returns
-        if self.cur.fetchone():
-            return True
-        else:
-            return False
+        # # If our query returns
+        # if self.cur.fetchone():
+        #     return True
+        # else:
+        #     return False
