@@ -115,6 +115,18 @@ def post_register_controller():
 #-----------------------------------------------------------------------------
 
 
+# Display the message page
+@get('/message')
+def get_message_controller():
+    '''
+        get_message
+        
+        Serves the message page
+    '''
+    return model.message_form()
+
+#-----------------------------------------------------------------------------
+
 # Attempt the login
 @post('/login')
 def post_login():
@@ -132,6 +144,21 @@ def post_login():
     # Call the appropriate method
     return model.login_check(username, password)
 
+#-----------------------------------------------------------------------------
+
+@post('/message')
+def post_message():
+    '''
+        post_message
+        
+        Handles message attempts
+        Expects a form containing a 'message' field
+    '''
+
+    msg = request.forms.get('message')
+
+    # Call the appropriate method
+    return model.message_sent()
 
 
 #-----------------------------------------------------------------------------
