@@ -98,6 +98,16 @@ def incoming_form(decrypted):
     # return page_view("incoming", list_of_regions=[('where'),('what')])
     return page_view("incoming", msg=decrypted)
 
+
+
+def enter_form():
+    '''
+        message_form
+        Returns the view for the message_form
+    '''
+    # return page_view("incoming", list_of_regions=[('where'),('what')])
+    return page_view("enter")
+
 #-----------------------------------------------------------------------------
 # Public Key
 #-----------------------------------------------------------------------------

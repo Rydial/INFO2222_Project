@@ -304,8 +304,8 @@ function displayMessage()
 {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", "/incoming");
-    var formData = new FormData();
-    formData.append("msg", "This is a test.");
+    let formData = new FormData();
+    formData.append("msg", "This is a test - check.");
     xmlhttp.send(formData);
 }
 

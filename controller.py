@@ -129,6 +129,7 @@ def post_register_controller():
 
     publicKey = request.json
     print(publicKey)
+    print("99\n")
     # Call the appropriate method
     return model.register_success(username, pwd, pwd2)
 
@@ -163,7 +164,9 @@ def get_incoming_controller():
         
         Serves the message page
     '''
-    return model.incoming_form(request.forms.get('msg'))
+    # print(request.GET.getall('msg'))
+
+    return model.enter_form()
 
 #-----------------------------------------------------------------------------
 
@@ -173,9 +176,9 @@ def post_incoming_controller():
     
 
     # Get Decrypted Message from JavaScript
-    print(request.forms.get('msg'))
-
-    return model.incoming_form(request.forms.get('msg'))
+    a = request.forms.get("msg")
+    print(a)
+    return model.incoming_form("we are in")
 
 #-----------------------------------------------------------------------------
 
