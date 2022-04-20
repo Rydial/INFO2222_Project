@@ -86,6 +86,18 @@ def register_success(name, pwd, pwd2):
         return page_view("register", reason="Your username exists already. Please select a new one")
 
 #-----------------------------------------------------------------------------
+# Incoming
+#-----------------------------------------------------------------------------
+
+def incoming_form():
+    '''
+        message_form
+        Returns the view for the message_form
+    '''
+    return page_view("incoming")
+
+
+#-----------------------------------------------------------------------------
 # Message
 #-----------------------------------------------------------------------------
 
@@ -123,6 +135,7 @@ def login_check(username, password):
     #     login = False
 
     if sql.check_credentials(username, password) == False:
+        print("AAAAAZZZZ")
         err_str = "Incorrect Username or Passwod"
         login = False
         

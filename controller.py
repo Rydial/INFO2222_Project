@@ -142,6 +142,18 @@ def get_message_controller():
 
 #-----------------------------------------------------------------------------
 
+# Display the message page
+@get('/incoming')
+def get_incoming_controller():
+    '''
+        get_message
+        
+        Serves the message page
+    '''
+    return model.incoming_form()
+
+#-----------------------------------------------------------------------------
+
 # Attempt the login
 @post('/login')
 def post_login():
