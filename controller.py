@@ -8,6 +8,8 @@ from bottle import route, get, post, error, request, static_file
 
 import model
 import sql
+from flask import Flask, render_template
+
 
 sql = sql.SQLDatabase("users.db")
 sql.database_setup()
@@ -85,6 +87,9 @@ def get_public_key():
         Gets public key from client
     '''
     print(request.json)
+    print ("AAA\n\n")
+    print(request.json)
+
     return model.publickey_extract(request.json)
 
 #-----------------------------------------------------------------------------

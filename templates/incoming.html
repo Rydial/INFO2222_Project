@@ -1,23 +1,39 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+ 
+        <title>Tuts+ Chat Application</title>
+        <meta name="description" content="Tuts+ Chat Application" />
+        <link rel="stylesheet" href="css/incoming.css" />
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="menu">
+                <p class="welcome">Welcome, <b></b></p>
+                <p class="logout"><a id="exit" href="#">Exit Chat</a></p>
+            </div>
+ 
+            <div id="chatbox"></div>
+ 
+            <form name="message" action="">
+                <input name="usermsg" type="text" id="usermsg" />
+                <input name="submitmsg" type="submit" id="submitmsg" value="Send" />
+            </form>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+            // jQuery Document
+            $(document).ready(function () {});
+        </script>
+    </body>
 
-<head>
-    <title>Firechat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="css/incoming.css">
-</head>
+    <label for="regions">Choose a region:</label>
 
-<body class="container">
-    <form class="chat-form">
-        <input class="input-box" placeholder="Share your thoughts..." autocomplete="off" />
-        <input type="submit" value="Send">
-    </form>
-
-    <div class="chat-box">
-    </div>
+    <select name="regions" id="regions">
+    {% for region in list_of_regions %}
+        <option value={{region.lower()}}>{{region}}</option>
+    {% endfor %}
+    </select>
     
-    <script src="https://cdn.firebase.com/js/client/2.4.1/firebase.js"></script>
-    <script src="script.js"></script>
-</body>
-
 </html>
