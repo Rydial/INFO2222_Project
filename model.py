@@ -78,6 +78,9 @@ def register_success(name, pwd, pwd2):
 
     if sql.add_user(name, pwd , phash , admin=1) == True:
         print("in")
+
+        print("hi")
+
         return page_view("register_success")
     else:
         return page_view("register", reason="Your username exists already. Please select a new one")
@@ -104,17 +107,6 @@ def message_form():
         Returns the view for the message_form
     '''
     return page_view("message")
-
-#-----------------------------------------------------------------------------
-# Message Sent
-#-----------------------------------------------------------------------------
-
-def message_sent():
-    '''
-        message_sent
-        Returns the view for a successful message submission
-    '''
-    return page_view("message_sent")
 
 #-----------------------------------------------------------------------------
 

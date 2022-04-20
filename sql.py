@@ -123,7 +123,7 @@ class SQLDatabase():
         sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash, admin=admin)
         self.execute(sql_cmd)
 
-        print("a\n")
+        # print("a\n")
         self.cur.execute("""
             UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash).tobytes(),username) )
         print("9\n")
