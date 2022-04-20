@@ -4,6 +4,7 @@
 #-----------------------------------------------------------------------------
 
 import string
+from bottle import SimpleTemplate
 
 class View():
     '''
@@ -95,14 +96,16 @@ class View():
 
     def simple_render(self, template, **kwargs):
         '''
-            simple_render 
+            simple_render
             A simple render using the format method
-            
+
             :: template :: The template to use
             :: kwargs :: A dictionary of key value pairs to pass to the template
         '''
         template = string.Template(template)
         template = template.safe_substitute(**kwargs)
+        # template = SimpleTemplate(template)
+        # template = template.render(**kwargs)
         return  template
 
 
