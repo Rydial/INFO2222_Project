@@ -5,7 +5,6 @@
 '''
 
 from bottle import route, get, post, error, request, static_file
-import flask
 
 import model
 import sql
@@ -81,11 +80,11 @@ def get_index():
 #-----------------------------------------------------------------------------
 
 @post('/home')
-def post_index():
-
-    print(request.get_json())
-
-    return model.index()
+def get_public_key():
+    '''
+        Gets public key from client
+    '''
+    print(request.json)
 
 #-----------------------------------------------------------------------------
 

@@ -160,21 +160,14 @@ function generateRSAKeyPair()
             // Store User Public Key in localStorage
             localStorage.setItem("publicKey", JSON.stringify(pK));
 
-            var oReq = new XMLHttpRequest();
-            oReq.open("POST", "/home");
-            oReq.send(localStorage.getItem("publicKey"));
+            var xmlhttp = new XMLHttpRequest();
+            var req = xmlhttp.open("POST", "/home");
 
-            // fetch('/',
-            //     {
-            //         method: 'GET',
-            //         headers: {
-            //             'Content-Type': 'application/json'
-            //         },
-            //         body: localStorage.getItem("privateKey")
-            //     }
-            // ).then(function() {
-            // // Request Completed
-            // });
+            // Set the content type header so bottle knows its json
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+            // send the data
+            xmlhttp.send(localStorage.getItem("publicKey"));
         });
     }
     // Debugging [Optional]
