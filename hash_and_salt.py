@@ -9,7 +9,7 @@ import os
 # Generate a random salt with a length of 32 bytes
 salt = os.urandom(32)
 
-# with open('salt.txt', 'w+b') as f:
+# with open('salt2.txt', 'w+b') as f:
 #     f.write(salt)
 
 # User Password

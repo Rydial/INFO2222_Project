@@ -51,20 +51,7 @@ class SQLDatabase():
     # Default admin password
     def database_setup(self, admin_password='a'):
 
-        with open('salt.txt', mode='rb') as file: # b is important -> binary
-            salt = file.read()
-            print(salt)
-        # salt = os.urandom(32)
-
-
-        # Hash the Password with the generated Salt
-        phash = hashlib.pbkdf2_hmac(
-            "sha256",                   # Hash Digest Algorithm
-            admin_password.encode("utf-8"),   # Password converted to Bytes
-            salt,                       # Salt
-            100000,                     # 100,000 iterations of SHA-256
-            dklen=128                   # Get a 128 byte hash/key 
-        )
+    
 
 
         # Clear the database if needed
@@ -97,8 +84,8 @@ class SQLDatabase():
         # print(hash2.tobytes())
         # print("\n\n\n\n\n")
         # Add our admin user
-        self.add_user('a', 'a', phash , admin=1)
-        # self.add_user('b', 'b', phash , admin=1)
+        self.add_user('a', 'a', admin=1)
+        self.add_additional_user('b', 'b', admin=1)
 
 
         # print(hash2)
@@ -110,30 +97,73 @@ class SQLDatabase():
     #-----------------------------------------------------------------------------
 
     # Add a user to the database
-    def add_user(self, username, password, hashed, admin=0):
+    def add_user(self, username, password, admin=0):
         sql_cmd = """
                 INSERT INTO Users
-                VALUES('{username}', '{password}', 'pooka', {admin})
+                VALUES('{username}', '{password}', 'temp', {admin})
             """
-        # print("AAA\n")
-        # print(hashed.tobytes())
-        # print("AAA\n")
+
+        with open('salt.txt', mode='rb') as file: # b is important -> binary
+            salt = file.read()
+            # print(salt)
+
+        # Hash the Password with the generated Salt
+        phash = hashlib.pbkdf2_hmac(
+            "sha256",                   # Hash Digest Algorithm
+            password.encode("utf-8"),   # Password converted to Bytes
+            salt,                       # Salt
+            100000,                     # 100,000 iterations of SHA-256
+            dklen=128                   # Get a 128 byte hash/key 
+        )
 
         with open('hashed.txt', 'w+b') as f:
             f.write(str.encode(username + '\n') )
-            f.write(hashed)
+            f.write(phash)
         
-        sql_cmd = sql_cmd.format(username=username, password=password, hashed = hashed, admin=admin)
-        print(hashed)
+        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash, admin=admin)
         self.execute(sql_cmd)
 
         print("a\n")
         self.cur.execute("""
-            UPDATE users SET hashed = ? WHERE username=?""", (memoryview(hashed).tobytes(),username) )
+            UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash).tobytes(),username) )
         print("9\n")
         self.commit()
         return True
 
+
+    # Add a user to the database
+    def add_additional_user(self, username, password, admin=0):
+        sql_cmd = """
+                INSERT INTO Users
+                VALUES('{username}', '{password}', 'temp', {admin})
+            """
+       
+        with open('salt2.txt', mode='rb') as file: # b is important -> binary
+            salt2 = file.read()
+
+
+        phash2 = hashlib.pbkdf2_hmac(
+            "sha256",                   # Hash Digest Algorithm
+            password.encode("utf-8"),   # Password converted to Bytes
+            salt2,                       # Salt
+            100000,                     # 100,000 iterations of SHA-256
+            dklen=128                   # Get a 128 byte hash/key 
+        )
+
+        with open('hashed.txt', 'w+b') as f:
+            f.write(str.encode(username + '\n') )
+            f.write(phash2)
+        
+        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash2, admin=admin)
+        print(phash2)
+        self.execute(sql_cmd)
+
+        print("a\n")
+        self.cur.execute("""
+            UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash2).tobytes(),username) )
+        print("9\n")
+        self.commit()
+        return True
     #-----------------------------------------------------------------------------
 
     # Check login credentials
@@ -152,7 +182,9 @@ class SQLDatabase():
         
         with open('salt.txt', mode='rb') as file: # b is important -> binary
             salt = file.read()
-            print(salt)
+
+        with open('salt2.txt', mode='rb') as file: # b is important -> binary
+            salt2 = file.read()
         
         # Display columns
         print('\nColumns in EMPLOYEE table:')
@@ -176,10 +208,18 @@ class SQLDatabase():
             dklen=128                   # Get a 128 byte hash/key 
             )
 
+            input_hash2 = hashlib.pbkdf2_hmac(
+            "sha256",                   # Hash Digest Algorithm
+            password.encode("utf-8"),   # Password converted to Bytes
+            salt2,                       # Salt
+            100000,                     # 100,000 iterations of SHA-256
+            dklen=128                   # Get a 128 byte hash/key 
+            )
+
 
             print(input_hash)
 
-            if (input_hash == row[2]):
+            if (input_hash == row[2] or input_hash2 == row[2]):
                 print("SUCCESSLY VERIFIED")
                 conn.commit()
                 conn.close()
