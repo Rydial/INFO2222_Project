@@ -84,7 +84,8 @@ def get_public_key():
     '''
         Gets public key from client
     '''
-    print(request.json)
+    print(request.forms.get('pk1'))
+    print(request.forms.get('pk2'))
 
 #-----------------------------------------------------------------------------
 

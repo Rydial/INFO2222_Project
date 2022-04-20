@@ -166,23 +166,7 @@ function generateKeyPairs()
     // Check if user hasn't generated a private key yet
     if (localStorage.getItem("privateKey1") == null)
     {
-        generateRSAKeyPair('1');
-        generateRSAKeyPair('2');
-
-        // Create an XML HTTP Request
-        var xmlhttp = new XMLHttpRequest();
-
-        // Set Request URL and Method
-        xmlhttp.open("POST", "/home");
-
-        // Set the Request Header Content Type to JSON
-        xmlhttp.setRequestHeader("Content-Type", "application/json");
-
-        // Send the Public Key to the Server
-        xmlhttp.send(
-            localStorage.getItem("publicKey1") +
-            "uniquedelimiter12345" +
-            localStorage.getItem("publicKey2"));
+        generateRSAKeyPairs();
     }
     // Debugging [Optional]
     else
@@ -200,9 +184,9 @@ function generateKeyPairs()
 }
 
 
-function generateRSAKeyPair(num)
+function generateRSAKeyPairs()
 {
-    // Generate Key Pair
+    // Generate 1st Key Pair
     crypto.subtle.generateKey(
         {
             name: "RSA-OAEP",
@@ -213,25 +197,59 @@ function generateRSAKeyPair(num)
         true,
         ["encrypt", "decrypt"]
     )
-    // Export Key Pair using JSON Web Key Format
-    .then(async function(keyPair) {
+    // Generate 2nd Key Pair
+    .then(function(keyPair1) {
+        crypto.subtle.generateKey(
+            {
+                name: "RSA-OAEP",
+                modulusLength: 4096,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: "SHA-256"
+            },
+            true,
+            ["encrypt", "decrypt"]
+        )
+        .then(async function(keyPair2) {
+            /* Export Private and Public Key into JSON Web Keys */
+            var privateKey1 = await crypto.subtle.exportKey(
+                'jwk', keyPair1.privateKey);
+            var publicKey1 = await crypto.subtle.exportKey(
+                'jwk', keyPair1.publicKey);
+            var privateKey2 = await crypto.subtle.exportKey(
+                'jwk', keyPair2.privateKey);
+            var publicKey2 = await crypto.subtle.exportKey(
+                'jwk', keyPair2.publicKey);
 
-        /* Export Private and Public Key into JSON Web Keys */
-        var privateKey = await crypto.subtle.exportKey(
-            'jwk', keyPair.privateKey);
-        var publicKey = await crypto.subtle.exportKey(
-            'jwk', keyPair.publicKey);
+            // Pack and Export Keys as Strings
+            return [privateKey1, publicKey2, privateKey2, publicKey2];
+        })
+        .then(function([sK1, pK1, sK2, pK2]) {
 
-        // Pack and Export Keys as Strings
-        return [privateKey, publicKey];
-    })
-    .then(function([sK, pK]) {
+            // Store User Private Key in localStorage
+            localStorage.setItem("privateKey1", JSON.stringify(sK1));
+            localStorage.setItem("privateKey2", JSON.stringify(sK2));
+    
+            // Store User Public Key in localStorage
+            localStorage.setItem("publicKey1", JSON.stringify(pK1));
+            localStorage.setItem("publicKey2", JSON.stringify(pK2));
 
-        // Store User Private Key in localStorage
-        localStorage.setItem("privateKey" + num, JSON.stringify(sK));
+            // Create an XML HTTP Request
+            var xmlhttp = new XMLHttpRequest();
 
-        // Store User Public Key in localStorage
-        localStorage.setItem("publicKey" + num, JSON.stringify(pK));
+            // Set Request URL and Method
+            xmlhttp.open("POST", "/home");
+
+            // Set the Request Header Content Type to JSON
+            // xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+            // Form Data
+            let formData = new FormData();
+            formData.append("pk1", localStorage.getItem("publicKey1"));
+            formData.append("pk2", localStorage.getItem("publicKey2"));
+
+            // Send the Public Key to the Server
+            xmlhttp.send(formData);
+        });
     });
 }
 
