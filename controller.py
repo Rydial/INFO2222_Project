@@ -84,8 +84,8 @@ def get_public_key():
     '''
         Gets public key from client
     '''
-    print(request.forms.get('pk1'))
-    print(request.forms.get('pk2'))
+    # print(request.forms.get('pk1'))
+    # print(request.forms.get('pk2'))
 
 #-----------------------------------------------------------------------------
 
@@ -149,7 +149,6 @@ def get_message_controller():
 
 #-----------------------------------------------------------------------------
 
-# Display the message page
 @get('/incoming')
 def get_incoming_controller():
     '''
@@ -157,7 +156,19 @@ def get_incoming_controller():
         
         Serves the message page
     '''
-    return model.incoming_form()
+    return model.incoming_form(request.forms.get('msg'))
+
+#-----------------------------------------------------------------------------
+
+# Display the message page
+@post('/incoming')
+def post_incoming_controller():
+    
+
+    # Get Decrypted Message from JavaScript
+    print(request.forms.get('msg'))
+
+    return model.incoming_form(request.forms.get('msg'))
 
 #-----------------------------------------------------------------------------
 
