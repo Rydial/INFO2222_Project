@@ -10,6 +10,7 @@ import random
 import hashlib
 # from no_sql_db import database
 import sql
+import json
 
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
@@ -95,6 +96,22 @@ def incoming_form():
         Returns the view for the message_form
     '''
     return page_view("incoming")
+
+#-----------------------------------------------------------------------------
+# Public Key
+#-----------------------------------------------------------------------------
+
+def publickey_extract(pk_json):
+    '''
+        index
+        Returns the view for the index
+    '''
+
+    print(pk_json)
+
+    print(pk_json['n'])
+
+    return page_view("index")
 
 
 #-----------------------------------------------------------------------------

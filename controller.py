@@ -85,6 +85,7 @@ def get_public_key():
         Gets public key from client
     '''
     print(request.json)
+    return model.publickey_extract(request.json)
 
 #-----------------------------------------------------------------------------
 
