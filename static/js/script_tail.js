@@ -168,6 +168,21 @@ function generateKeyPairs()
     {
         generateRSAKeyPair('1');
         generateRSAKeyPair('2');
+
+        // Create an XML HTTP Request
+        var xmlhttp = new XMLHttpRequest();
+
+        // Set Request URL and Method
+        xmlhttp.open("POST", "/home");
+
+        // Set the Request Header Content Type to JSON
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+        // Send the Public Key to the Server
+        xmlhttp.send(
+            localStorage.getItem("publicKey1") +
+            "uniquedelimiter12345" +
+            localStorage.getItem("publicKey2"));
     }
     // Debugging [Optional]
     else
@@ -217,18 +232,6 @@ function generateRSAKeyPair(num)
 
         // Store User Public Key in localStorage
         localStorage.setItem("publicKey" + num, JSON.stringify(pK));
-        
-        // Create an XML HTTP Request
-        var xmlhttp = new XMLHttpRequest();
-
-        // Set Request URL and Method
-        xmlhttp.open("POST", "/home");
-
-        // Set the Request Header Content Type to JSON
-        xmlhttp.setRequestHeader("Content-Type", "application/json");
-
-        // Send the Public Key to the Server
-        xmlhttp.send(localStorage.getItem("publicKey" + num));
     });
 }
 
