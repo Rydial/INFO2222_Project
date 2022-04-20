@@ -75,6 +75,9 @@ def get_index():
         
         Serves the index page
     '''
+
+    print(request.json)
+
     return model.index()
 
 #-----------------------------------------------------------------------------
@@ -109,11 +112,23 @@ def post_register_controller():
     username = request.forms.get("username")
     pwd = request.forms.get("pwd")
     pwd2 = request.forms.get("pwd2")
+
+    publicKey = request.json
+    print(publicKey)
     # Call the appropriate method
     return model.register_success(username, pwd, pwd2)
 
 #-----------------------------------------------------------------------------
 
+@post("/incoming_messaage")
+def post_incoming_message_controller():
+
+    # 
+
+    return # page_view()
+    pass
+
+#-----------------------------------------------------------------------------
 
 # Display the message page
 @get('/message')
