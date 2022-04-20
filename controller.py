@@ -5,6 +5,7 @@
 '''
 
 from bottle import route, get, post, error, request, static_file
+import flask
 
 import model
 import sql
@@ -75,8 +76,14 @@ def get_index():
         
         Serves the index page
     '''
+    return model.index()
 
-    print(request.json)
+#-----------------------------------------------------------------------------
+
+@post('/home')
+def post_index():
+
+    print(request.get_json())
 
     return model.index()
 

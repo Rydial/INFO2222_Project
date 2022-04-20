@@ -157,24 +157,31 @@ function generateRSAKeyPair()
             // Store User Private Key in localStorage
             localStorage.setItem("privateKey", JSON.stringify(sK));
 
-            // Send User Public Key to the Server 
-            fetch('/',
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(pK)
-                }
-            ).then(function() {
-                // Request Completed
-            });
+            // Store User Public Key in localStorage
+            localStorage.setItem("publicKey", JSON.stringify(pK));
+
+            var oReq = new XMLHttpRequest();
+            oReq.open("POST", "/home");
+            oReq.send(localStorage.getItem("publicKey"));
+
+            // fetch('/',
+            //     {
+            //         method: 'GET',
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         },
+            //         body: localStorage.getItem("privateKey")
+            //     }
+            // ).then(function() {
+            // // Request Completed
+            // });
         });
     }
     // Debugging [Optional]
     else
     {
         console.log(localStorage.getItem("privateKey"));
+        console.log(localStorage.getItem("publicKey")); 
     }
 }
 
@@ -209,8 +216,11 @@ function unpack(base64)
 
 /******************************************************************************/
 
+// localStorage.clear();
+
 // Generate RSA Public-Private Key Pair Once (persists forever)
 generateRSAKeyPair();
+
 
 // Retrive Messege Submit Button Element
 var messageButton = document.getElementById('messageSubmitForm');
