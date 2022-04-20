@@ -1,4 +1,8 @@
 
+/* Useful Debugging Line */
+// .then(function() {alert("Success!")}).catch(function(error) {alert(error)});
+
+
 /********************************* Functions **********************************/
 
 function decodeString(encoded)
@@ -11,29 +15,58 @@ function decodeString(encoded)
 
 function decryptMessage()
 {
-    // Import localStorage Key
-    importKey().then(function(key) {
-    
-        // Retrieve Stored Encrypted Message from localStorage and Unpack it
-        var cipher = unpack(localStorage.getItem("encryptedMsg"));
+    // Retrieve User Private Key from localStorage and Import it 
+    crypto.subtle.importKey(
+        'jwk',
+        JSON.parse(localStorage.getItem("privateKey1")),
+        {
+            name: 'RSA-OAEP',
+            hash: 'SHA-256'
+        },
+        true,
+        ["decrypt"]
+    )
+    .then(function(userPK) {
 
-        // Retrive the IV from Local Storage
-        var iv = unpack(localStorage.getItem("sharedIV"));
+        // Retrieve Encrypted Shared Secret Key
+        var sharedSKCipher = unpack(localStorage.getItem("encryptedSK"));
 
-        // Decrypt the Encrypted Message
-        crypto.subtle.decrypt(
+        // Decrypt and Retrieve the Secret Key
+        return crypto.subtle.decrypt(
             {
-                name: 'AES-GCM',
-                iv: iv
+                name: 'RSA-OAEP'
             },
-            key,
-            cipher
+            userPK,
+            sharedSKCipher
         )
-        .then(function(decrypted) {
-            const msg = decodeString(decrypted);
+    })
+    .then(function(sharedSKRaw) {
+        return crypto.subtle.importKey(
+            'raw',
+            sharedSKRaw,
+            {
+                name: 'AES-GCM'
+            },
+            true,
+            ['encrypt', 'decrypt']
+        )
+    })
+    .then(function(sharedSK) {
 
-            alert(msg);
-        });
+        // Decrypt and Retrieve the Message
+        return crypto.subtle.decrypt(
+            {
+                name: "AES-GCM",
+                iv: unpack(localStorage.getItem("sharedIV"))
+            },
+            sharedSK,
+            unpack(localStorage.getItem("encryptedMsg"))
+        )
+    })
+    .then(function(plaintext) {
+        const msg = decodeString(plaintext);
+
+        alert(msg);
     });
 }
 
@@ -48,150 +81,155 @@ function encodeString(string)
 
 function encryptMessage()
 {
-    // Import localStorage Key
-    importKey().then(function(key) {
+    // Retrieve Raw Input Message from the Website
+    var inputMsg = document.getElementById('messageTxt').value;
 
-        // Retrieve Raw Input Message from the Website
-        var inputMsg = document.getElementById('messageTxt').value;
+    // Encode Message
+    var encoded = encodeString(inputMsg);
 
-        // Encode Message
-        var encoded = encodeString(inputMsg);
+    // Generate an IV (Initialization Vector)
+    var iv = crypto.getRandomValues(new Uint8Array(12));
 
-        // Retrive the IV from Local Storage
-        var iv = unpack(localStorage.getItem("sharedIV"));
+    // Generate an AES Shared Secret Key
+    crypto.subtle.generateKey(
+        {
+            name: 'AES-GCM',
+            length: 256
+        },
+        true,
+        ['encrypt', 'decrypt']
+    )
+    .then(function(sharedSK) {
 
-        // Encrypt the Message
+        // Encrypt the Message with the Secret Key
         crypto.subtle.encrypt(
             {
                 name: 'AES-GCM',
                 iv: iv
             },
-            key,
+            sharedSK,
             encoded
         )
-        // Pack and Store the Message in Local Storage
-        .then(function(encrypted) {
-            const packed = pack(encrypted);
+        .then(function(encryptedMsg) {
 
-            localStorage.setItem("encryptedMsg", packed);
+            // Retrive the Recipient's Public Key (Temp)
+            crypto.subtle.importKey(
+                'jwk',
+                JSON.parse(localStorage.getItem("publicKey1")),
+                {
+                    name: 'RSA-OAEP',
+                    hash: 'SHA-256'
+                },
+                true,
+                ["encrypt"]
+            )
+            .then(function(recipientPK) {
 
-            // Temporary
-            decryptMessage();
+                // Export the Secret Key into a String
+                crypto.subtle.exportKey(
+                    'raw',
+                    sharedSK
+                )
+                .then(function(rawSK) {
+
+                    // Encrypt the Secret Key with the Public Key
+                    crypto.subtle.encrypt(
+                        {
+                            name: 'RSA-OAEP'
+                        },
+                        recipientPK,
+                        rawSK
+                    )
+                    .then(function(encryptedSK) {
+                        
+                        // Store the Encrypted Secret Key
+                        localStorage.setItem("encryptedSK", pack(encryptedSK));
+
+                        // Store the Encrypted Message
+                        localStorage.setItem("encryptedMsg", pack(encryptedMsg));
+
+                        // Store the IV
+                        localStorage.setItem("sharedIV", pack(iv));
+
+                        // TEMPORARY
+                        decryptMessage();
+                    });
+                });
+            });
         });
     });
 }
 
 
-function exportKey(key)
-{
-    // Export Key into an ArrayBuffer
-    crypto.subtle.exportKey('raw', key)
-    // Store Key in localStorage
-    .then(function(raw) {
-        localStorage.setItem("sharedPrivateKey", pack(raw))
-    });
-}
-
-
-function generateKeyandIV()
-{
-    // Check if key doesn't exists
-    if (localStorage.getItem("sharedPrivateKey") == null)
-    {
-        // Generate and Store Key in localStorage
-        crypto.subtle.generateKey(
-            {
-                name: 'AES-GCM',        // Encryption Algorithm
-                length: 256             // Key Length
-            },
-            true,                       // ?
-            ['encrypt', 'decrypt']      // Crypto Operations Key can be used for
-        )
-        .then(key => exportKey(key));
-
-        // Generate and Store IV in localStorage
-        localStorage.setItem(
-            "sharedIV",
-            pack(crypto.getRandomValues(new Uint8Array(12)))
-        );
-    }
-    else
-    {
-        console.log(localStorage.getItem("sharedPrivateKey"));
-        console.log(localStorage.getItem("sharedIV"));
-        console.log(localStorage.getItem("encryptedMsg"));
-    }
-}
-
-
-function generateRSAKeyPair()
+function generateKeyPairs()
 {
     // Check if user hasn't generated a private key yet
-    if (localStorage.getItem("privateKey") == null)
+    if (localStorage.getItem("privateKey1") == null)
     {
-        // Generate Key Pair
-        crypto.subtle.generateKey(
-            {
-                name: "RSA-OAEP",
-                modulusLength: 4096,
-                publicExponent: new Uint8Array([1, 0, 1]),
-                hash: "SHA-256"
-            },
-            true,
-            ["encrypt", "decrypt"]
-        )
-        // Export Key Pair using JSON Web Key Format
-        .then(async function(keyPair) {
-
-            /* Export Private and Public Key into JSON Web Keys */
-            var privateKey = await crypto.subtle.exportKey(
-                'jwk', keyPair.privateKey);
-            var publicKey = await crypto.subtle.exportKey(
-                'jwk', keyPair.publicKey);
-
-            // Pack and Export Keys as Strings
-            return [privateKey, publicKey];
-        })
-        .then(function([sK, pK]) {
-
-            // Store User Private Key in localStorage
-            localStorage.setItem("privateKey", JSON.stringify(sK));
-
-            // Store User Public Key in localStorage
-            localStorage.setItem("publicKey", JSON.stringify(pK));
-
-            var xmlhttp = new XMLHttpRequest();
-            var req = xmlhttp.open("POST", "/home");
-
-            // Set the content type header so bottle knows its json
-            xmlhttp.setRequestHeader("Content-Type", "application/json");
-
-            // send the data
-            xmlhttp.send(localStorage.getItem("publicKey"));
-        });
+        generateRSAKeyPair('1');
+        generateRSAKeyPair('2');
     }
     // Debugging [Optional]
     else
     {
-        console.log(localStorage.getItem("privateKey"));
-        console.log(localStorage.getItem("publicKey")); 
+        // console.log(localStorage.getItem("privateKey1"));
+        console.log(localStorage.getItem("publicKey1"));
+
+        // console.log(localStorage.getItem("privateKey2"));
+        console.log(localStorage.getItem("publicKey2"));
+
+        console.log(localStorage.getItem("encryptedSK"));
+        console.log(localStorage.getItem("encryptedMsg"));
+        console.log(localStorage.getItem("sharedIV"));
     }
 }
 
 
-function importKey()
+function generateRSAKeyPair(num)
 {
-    // Retrieve Key from localStorage
-    const unpacked = unpack(localStorage.getItem("sharedPrivateKey"));
-
-    // Return Imported Key
-    return crypto.subtle.importKey(
-        'raw',
-        unpacked,
-        'AES-GCM',
+    // Generate Key Pair
+    crypto.subtle.generateKey(
+        {
+            name: "RSA-OAEP",
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256"
+        },
         true,
-        ['encrypt', 'decrypt']
-    );
+        ["encrypt", "decrypt"]
+    )
+    // Export Key Pair using JSON Web Key Format
+    .then(async function(keyPair) {
+
+        /* Export Private and Public Key into JSON Web Keys */
+        var privateKey = await crypto.subtle.exportKey(
+            'jwk', keyPair.privateKey);
+        var publicKey = await crypto.subtle.exportKey(
+            'jwk', keyPair.publicKey);
+
+        // Pack and Export Keys as Strings
+        return [privateKey, publicKey];
+    })
+    .then(function([sK, pK]) {
+
+        // Store User Private Key in localStorage
+        localStorage.setItem("privateKey" + num, JSON.stringify(sK));
+
+        // Store User Public Key in localStorage
+        localStorage.setItem("publicKey" + num, JSON.stringify(pK));
+        
+        // Create an XML HTTP Request
+        var xmlhttp = new XMLHttpRequest();
+
+        // Set Request URL and Method
+        xmlhttp.open("POST", "/home");
+
+        // Set the Request Header Content Type to JSON
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+        // Send the Public Key to the Server
+        xmlhttp.send(localStorage.getItem("publicKey" + num));
+    });
 }
 
 
@@ -211,9 +249,8 @@ function unpack(base64)
 
 // localStorage.clear();
 
-// Generate RSA Public-Private Key Pair Once (persists forever)
-generateRSAKeyPair();
-
+// Generate All RSA Public-Private Key Pairs Once (persists forever)
+generateKeyPairs();
 
 // Retrive Messege Submit Button Element
 var messageButton = document.getElementById('messageSubmitForm');
