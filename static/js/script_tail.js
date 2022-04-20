@@ -18,7 +18,7 @@ function decryptMessage()
     // Retrieve User Private Key from localStorage and Import it 
     crypto.subtle.importKey(
         'jwk',
-        JSON.parse(localStorage.getItem("privateKey1")),
+        JSON.parse(localStorage.getItem("encryptionSK1")),
         {
             name: 'RSA-OAEP',
             hash: 'SHA-256'
@@ -115,7 +115,7 @@ function encryptMessage()
             // Retrive the Recipient's Public Key (Temp)
             crypto.subtle.importKey(
                 'jwk',
-                JSON.parse(localStorage.getItem("publicKey1")),
+                JSON.parse(localStorage.getItem("encryptionPK1")),
                 {
                     name: 'RSA-OAEP',
                     hash: 'SHA-256'
@@ -141,7 +141,7 @@ function encryptMessage()
                         rawSK
                     )
                     .then(function(encryptedSK) {
-                        
+
                         // Store the Encrypted Secret Key
                         localStorage.setItem("encryptedSK", pack(encryptedSK));
 
@@ -164,19 +164,19 @@ function encryptMessage()
 function generateKeyPairs()
 {
     // Check if user hasn't generated a private key yet
-    if (localStorage.getItem("privateKey1") == null)
+    if (localStorage.getItem("encryptionSK1") == null)
     {
-        generateRSAKeyPair('1');
-        generateRSAKeyPair('2');
+        generateEncryptionKeyPairs();
+        generateSigningKeyPairs();
     }
     // Debugging [Optional]
     else
     {
-        // console.log(localStorage.getItem("privateKey1"));
-        console.log(localStorage.getItem("publicKey1"));
+        // console.log(localStorage.getItem("encryptionSK1"));
+        console.log(localStorage.getItem("encryptionPK1"));
 
-        // console.log(localStorage.getItem("privateKey2"));
-        console.log(localStorage.getItem("publicKey2"));
+        // console.log(localStorage.getItem("encryptionSK2"));
+        console.log(localStorage.getItem("encryptionPK2"));
 
         console.log(localStorage.getItem("encryptedSK"));
         console.log(localStorage.getItem("encryptedMsg"));
@@ -185,10 +185,10 @@ function generateKeyPairs()
 }
 
 
-function generateRSAKeyPair(num)
+async function generateEncryptionKeyPairs()
 {
-    // Generate Key Pair
-    crypto.subtle.generateKey(
+    // Generate 1st Encryption Key Pair
+    var encryptionKeyPair1 = await crypto.subtle.generateKey(
         {
             name: "RSA-OAEP",
             modulusLength: 4096,
@@ -197,39 +197,94 @@ function generateRSAKeyPair(num)
         },
         true,
         ["encrypt", "decrypt"]
-    )
-    // Export Key Pair using JSON Web Key Format
-    .then(async function(keyPair) {
+    );
 
-        /* Export Private and Public Key into JSON Web Keys */
-        var privateKey = await crypto.subtle.exportKey(
-            'jwk', keyPair.privateKey);
-        var publicKey = await crypto.subtle.exportKey(
-            'jwk', keyPair.publicKey);
+    // Generate 2nd Encryption Key Pair
+    var encryptionKeyPair2 = await crypto.subtle.generateKey(
+        {
+            name: "RSA-OAEP",
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256"
+        },
+        true,
+        ["encrypt", "decrypt"]
+    );
 
-        // Pack and Export Keys as Strings
-        return [privateKey, publicKey];
-    })
-    .then(function([sK, pK]) {
+    // Generate 1st Signing Key Pair
+    var signingKeyPair1 = await crypto.subtle.generateKey(
+        {
+            name: "RSA-PSS",
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256"
+        },
+        true,
+        ["sign", "verify"]
+    );
 
-        // Store User Private Key in localStorage
-        localStorage.setItem("privateKey" + num, JSON.stringify(sK));
+    // Generate 2nd Signing Key Pair
+    var signingKeyPair2 = await crypto.subtle.generateKey(
+        {
+            name: "RSA-PSS",
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256"
+        },
+        true,
+        ["sign", "verify"]
+    );
 
-        // Store User Public Key in localStorage
-        localStorage.setItem("publicKey" + num, JSON.stringify(pK));
-        
-        // Create an XML HTTP Request
-        var xmlhttp = new XMLHttpRequest();
+    /* Export Encryption Key Pairs into JSON Web Keys */
+    var eSK1 = await crypto.subtle.exportKey(
+        'jwk', encryptionKeyPair1.privateKey);
+    var ePK1 = await crypto.subtle.exportKey(
+        'jwk', encryptionKeyPair1.publicKey);
+    var eSK2 = await crypto.subtle.exportKey(
+        'jwk', encryptionKeyPair2.privateKey);
+    var ePK2 = await crypto.subtle.exportKey(
+        'jwk', encryptionKeyPair2.publicKey);
 
-        // Set Request URL and Method
-        xmlhttp.open("POST", "/home");
+    /* Export Signing Key Pairs into JSON Web Keys */
+    var sSK1 = await crypto.subtle.exportKey(
+        'jwk', signingKeyPair1.privateKey);
+    var sPK1 = await crypto.subtle.exportKey(
+        'jwk', signingKeyPair1.publicKey);
+    var sSK2 = await crypto.subtle.exportKey(
+        'jwk', signingKeyPair2.privateKey);
+    var sPK2 = await crypto.subtle.exportKey(
+        'jwk', signingKeyPair2.publicKey);
+    
+    // Store User Private Key in localStorage
+    localStorage.setItem("encryptionSK1", JSON.stringify(eSK1));
+    localStorage.setItem("encryptionSK2", JSON.stringify(eSK2));
 
-        // Set the Request Header Content Type to JSON
-        xmlhttp.setRequestHeader("Content-Type", "application/json");
+    // Store User Public Key in localStorage
+    localStorage.setItem("encryptionPK1", JSON.stringify(ePK1));
+    localStorage.setItem("encryptionPK2", JSON.stringify(ePK2));
 
-        // Send the Public Key to the Server
-        xmlhttp.send(localStorage.getItem("publicKey" + num));
-    });
+    // Create an XML HTTP Request
+    var xmlhttp = new XMLHttpRequest();
+
+    // Set Request URL and Method
+    xmlhttp.open("POST", "/home");
+
+    // Set the Request Header Content Type to JSON
+    // xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+    // Form Data
+    let formData = new FormData();
+    formData.append("pk1", localStorage.getItem("encryptionPK1"));
+    formData.append("pk2", localStorage.getItem("encryptionPK2"));
+
+    // Send the Public Key to the Server
+    xmlhttp.send(formData);
+}
+
+
+function generateSigningKeyPairs()
+{
+
 }
 
 
@@ -245,7 +300,18 @@ function unpack(base64)
         char => char.charCodeAt()))).buffer;
 }
 
+function displayMessage()
+{
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", "/incoming");
+    var formData = new FormData();
+    formData.append("msg", "This is a test.");
+    xmlhttp.send(formData);
+}
+
 /******************************************************************************/
+
+displayMessage();
 
 // localStorage.clear();
 
@@ -257,3 +323,4 @@ var messageButton = document.getElementById('messageSubmitForm');
 
 // Connect Button to encryptMessage Function
 messageButton.addEventListener('submit', encryptMessage);
+
