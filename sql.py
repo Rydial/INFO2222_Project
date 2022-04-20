@@ -75,6 +75,20 @@ class SQLDatabase():
             
         )""")
 
+   
+
+        self.execute("""
+                INSERT INTO friendships
+                VALUES(1, 'a', 'b')
+            """)
+
+        self.execute("""
+                INSERT INTO friendships
+                VALUES(2, 'b', 'a')
+            """)
+
+
+
         self.commit()
 
         # with open('hashed.txt', 'w+b') as f:
@@ -86,6 +100,11 @@ class SQLDatabase():
         # Add our admin user
         self.add_user('a', 'a', admin=1)
         self.add_additional_user('b', 'b', admin=1)
+
+        print('\nColumns in FRIENDS table:')
+        data=self.execute('''SELECT * FROM friendships''')
+        for column in data:
+            print(column)
 
 
         # print(hash2)
@@ -126,7 +145,6 @@ class SQLDatabase():
         # print("a\n")
         self.cur.execute("""
             UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash).tobytes(),username) )
-        print("9\n")
         self.commit()
         return True
 
@@ -158,10 +176,8 @@ class SQLDatabase():
         print(phash2)
         self.execute(sql_cmd)
 
-        print("a\n")
         self.cur.execute("""
             UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash2).tobytes(),username) )
-        print("9\n")
         self.commit()
         return True
     #-----------------------------------------------------------------------------
