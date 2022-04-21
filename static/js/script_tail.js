@@ -360,13 +360,19 @@ function unpack(base64)
 function displayMessage()
 {
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", "/incoming");
-    let formData = new FormData();
-    formData.append("sender", localStorage.getItem("sender"));
-    formData.append("receiver", localStorage.getItem("receiver"));
+    var req = xmlhttp.open("POST", "/incoming");
+
+    // Set the content type header so bottle knows its json
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+    // the data we want to send
     decryptMessage().then(function(msg) {
-        formData.append("msg", msg);
-        xmlhttp.send(formData);
+        var data = {
+            sender : localStorage.getItem("sender"),
+            receiver : localStorage.getItem("receiver"),
+            pubK : msg
+        };
+        xmlhttp.send(JSON.stringify(data));
     });
 }
 
@@ -383,6 +389,4 @@ generateKeyPairs();
 var messageButton = document.getElementById('messageSubmitForm');
 
 // Connect Button to encryptMessage Function
-// messageButton.addEventListener('submit', encryptMessage);
-messageButton.addEventListener('submit', decryptMessage);
-
+messageButton.addEventListener('submit', encryptMessage);
