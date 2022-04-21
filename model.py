@@ -38,7 +38,12 @@ def login_form():
         login_form
         Returns the view for the login_form
     '''
-    return page_view("old_login")
+    if(sql.check_online()):
+        print("logged in")
+        return page_view("online")
+    else:
+        print("oh no")
+        return page_view("old_login")
 
 #-----------------------------------------------------------------------------
 # Register
@@ -172,7 +177,7 @@ def login_check(username, password):
         current_user = username
         print(current_user)
         print("wtafa")
-        # sql.login(username)
+        sql.online(username)
         return page_view("valid", name=username)
     else:
         print(err_str)
@@ -226,3 +231,12 @@ def handle_errors(error):
     error_type = error.status_line
     error_msg = error.body
     return page_view("error", error_type=error_type, error_msg=error_msg)
+
+def offline():
+    if(sql.check_online()):
+        sql.offline()
+        global current_user
+        current_user = True
+        return page_view("offline")
+    else:
+        return page_view("not_online")

@@ -65,7 +65,8 @@ class SQLDatabase():
             username TEXT,
             password TEXT,
             hashed BLOB,
-            admin INTEGER DEFAULT 0
+            admin INTEGER DEFAULT 0,
+            online INTEGER DEFAULT 0
         )""")
 
         self.execute( """CREATE TABLE friendships(
@@ -98,8 +99,8 @@ class SQLDatabase():
         # print(hash2.tobytes())
         # print("\n\n\n\n\n")
         # Add our admin user
-        self.add_user('a', 'a', admin=1)
-        self.add_additional_user('b', 'b', admin=1)
+        self.add_user('a', 'a', admin=1, online=0)
+        self.add_additional_user('b', 'b', admin=1, online=0)
 
         # print('\nColumns in FRIENDS table:')
         # data=self.execute('''SELECT * FROM friendships''')
@@ -116,10 +117,10 @@ class SQLDatabase():
     #-----------------------------------------------------------------------------
 
     # Add a user to the database
-    def add_user(self, username, password, admin=0):
+    def add_user(self, username, password, admin=0, online=0 ):
         sql_cmd = """
                 INSERT INTO Users
-                VALUES('{username}', '{password}', 'temp', {admin})
+                VALUES('{username}', '{password}', 'temp', {admin}, {online})
             """
 
         with open('salt.txt', mode='rb') as file: # b is important -> binary
@@ -139,7 +140,7 @@ class SQLDatabase():
             f.write(str.encode(username + '\n') )
             f.write(phash)
         
-        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash, admin=admin)
+        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash, admin=admin, online=online)
         self.execute(sql_cmd)
 
         # print("a\n")
@@ -150,10 +151,10 @@ class SQLDatabase():
 
 
     # Add a user to the database
-    def add_additional_user(self, username, password, admin=0):
+    def add_additional_user(self, username, password, admin=0, online=0):
         sql_cmd = """
                 INSERT INTO Users
-                VALUES('{username}', '{password}', 'temp', {admin})
+                VALUES('{username}', '{password}', 'temp', {admin}, {online})
             """
        
         with open('salt2.txt', mode='rb') as file: # b is important -> binary
@@ -172,7 +173,7 @@ class SQLDatabase():
             f.write(str.encode(username + '\n') )
             f.write(phash2)
         
-        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash2, admin=admin)
+        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash2, admin=admin, online=online)
         # print(phash2)
         self.execute(sql_cmd)
 
@@ -282,18 +283,29 @@ class SQLDatabase():
 
         self.execute(sql_query)
         self.commit()
-        print("user now online")
         return True
 
     def offline(self):
         sql_query = """
-                UPDATE Users SET login = 0
-                WHERE login = 1
+                UPDATE Users SET online = 0
+                WHERE online = 1
             """
 
         sql_query = sql_query.format()
 
         self.execute(sql_query)
         self.commit()
-        print("going offline")
         return True
+
+    def check_online(self):
+        sql_query = """
+                SELECT * FROM Users
+                WHERE online = 1
+            """
+
+        sql_query = sql_query.format()
+        self.execute(sql_query)
+        r = self.cur.fetchone()
+        if r:
+            return True
+        return False

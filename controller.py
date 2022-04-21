@@ -242,6 +242,13 @@ def get_about():
         Serves the about page
     '''
     return model.about()
+
+
+
+@get('/offline')
+def get_offline():
+    return model.offline()
+
 #-----------------------------------------------------------------------------
 
 # Help with debugging
