@@ -95,13 +95,13 @@ def register_success(name, pwd, pwd2):
 # Incoming
 #-----------------------------------------------------------------------------
 
-def incoming_form(decrypted):
+def incoming_form(msg, sender):
     '''
         message_form
         Returns the view for the message_form
     '''
     # return page_view("incoming", list_of_regions=[('where'),('what')])
-    return page_view("incoming", msg=decrypted)
+    return page_view("incoming", msg=msg, sender=sender)
 
 
 

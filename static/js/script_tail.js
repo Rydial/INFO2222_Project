@@ -366,11 +366,10 @@ function displayMessage()
     xmlhttp.setRequestHeader("Content-Type", "application/json");
 
     // the data we want to send
-    decryptMessage().then(function(msg) {
+    decryptMessage().then(function(plaintext) {
         var data = {
             sender : localStorage.getItem("sender"),
-            receiver : localStorage.getItem("receiver"),
-            pubK : msg
+            msg : plaintext
         };
         xmlhttp.send(JSON.stringify(data));
     });
