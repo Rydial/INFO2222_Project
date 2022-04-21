@@ -8,7 +8,6 @@ from bottle import route, get, post, error, request, static_file
 
 import model
 import sql
-from flask import Flask, render_template
 
 
 sql = sql.SQLDatabase("users.db")
@@ -173,7 +172,7 @@ def get_incoming_controller():
 # Display the message page
 @post('/incoming')
 def post_incoming_controller():
-    
+    # content = request.
 
     # Get Decrypted Message from JavaScript
     a = request.forms.get("msg")
@@ -239,3 +238,6 @@ def post_debug(cmd):
 @error(404)
 def error(error): 
     return model.handle_errors(error)
+
+#-----------------------------------------------------------------------------
+
