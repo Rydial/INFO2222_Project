@@ -369,6 +369,7 @@ function displayMessage()
     decryptMessage().then(function(plaintext) {
         var data = {
             sender : localStorage.getItem("sender"),
+            receiver : localStorage.getItem("receiver"),
             msg : plaintext
         };
         xmlhttp.send(JSON.stringify(data));

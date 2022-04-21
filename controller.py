@@ -194,7 +194,7 @@ def post_incoming_controller():
 
     else:
 
-        return model.incoming_form(b["msg"], b["sender"])
+        return model.incoming_form(b["msg"], b["sender"], b["receiver"])
 
 #-----------------------------------------------------------------------------
 

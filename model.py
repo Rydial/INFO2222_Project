@@ -39,10 +39,8 @@ def login_form():
         Returns the view for the login_form
     '''
     if(sql.check_online()):
-        print("logged in")
         return page_view("online")
     else:
-        print("oh no")
         return page_view("old_login")
 
 #-----------------------------------------------------------------------------
@@ -83,9 +81,7 @@ def register_success(name, pwd, pwd2):
         return page_view("register", reason="Passwords are not the same, please try again")
 
     if sql.add_user(name, pwd , admin=1) == True:
-        print("in")
-
-        print("hi")
+     
 
         return page_view("register_success")
     else:
@@ -95,13 +91,24 @@ def register_success(name, pwd, pwd2):
 # Incoming
 #-----------------------------------------------------------------------------
 
-def incoming_form(msg, sender):
+def incoming_form(msg, sender, receiver):
     '''
         message_form
         Returns the view for the message_form
     '''
     # return page_view("incoming", list_of_regions=[('where'),('what')])
-    return page_view("incoming", msg=msg, sender=sender)
+    if(sql.check_online()):
+        a = sql.check_online_user()
+        # print(receiver)
+        # print(a[0])
+        if (receiver == a[0]):
+            return page_view("incoming", msg=msg, sender=sender)
+        else:
+            return page_view("no_message")
+    else:
+        return page_view("not_loggedin")
+
+    # return page_view("incoming", msg=msg, sender=sender)
 
 
 

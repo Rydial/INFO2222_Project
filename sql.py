@@ -51,9 +51,6 @@ class SQLDatabase():
     # Default admin password
     def database_setup(self, admin_password='a'):
 
-    
-
-
         # Clear the database if needed
         self.execute("DROP TABLE IF EXISTS Users")
         self.execute("DROP TABLE IF EXISTS friendships")
@@ -63,7 +60,6 @@ class SQLDatabase():
         # Create the users table
         self.execute("""CREATE TABLE Users(
             username TEXT,
-            password TEXT,
             hashed BLOB,
             admin INTEGER DEFAULT 0,
             online INTEGER DEFAULT 0
@@ -76,42 +72,22 @@ class SQLDatabase():
             
         )""")
 
-   
-
         self.execute("""
                 INSERT INTO friendships
-                VALUES(1, 'a', 'b')
+                VALUES(1, 'Michael', 'Danny')
             """)
 
         self.execute("""
                 INSERT INTO friendships
-                VALUES(2, 'b', 'a')
+                VALUES(2, 'Danny', 'Michael')
             """)
-
-
 
         self.commit()
 
-        # with open('hashed.txt', 'w+b') as f:
-        #     f.write(hash)
-        
-        # hash2 = memoryview(hash).tobytes()
-        # print(hash2.tobytes())
-        # print("\n\n\n\n\n")
-        # Add our admin user
-        self.add_user('a', 'a', admin=1, online=0)
-        self.add_additional_user('b', 'b', admin=1, online=0)
-
-        # print('\nColumns in FRIENDS table:')
-        # data=self.execute('''SELECT * FROM friendships''')
-        # for column in data:
-        #     print(column)
-
-
-        # print(hash2)
+        self.add_user('Michael', 'complex_pwd123', admin=1, online=0)
+        self.add_additional_user('Danny', 'pwd_reverse123!', admin=1, online=0)
 
         
-
     #-----------------------------------------------------------------------------
     # User handling
     #-----------------------------------------------------------------------------
@@ -120,7 +96,7 @@ class SQLDatabase():
     def add_user(self, username, password, admin=0, online=0 ):
         sql_cmd = """
                 INSERT INTO Users
-                VALUES('{username}', '{password}', 'temp', {admin}, {online})
+                VALUES('{username}', 'temp', {admin}, {online})
             """
 
         with open('salt.txt', mode='rb') as file: # b is important -> binary
@@ -140,10 +116,9 @@ class SQLDatabase():
             f.write(str.encode(username + '\n') )
             f.write(phash)
         
-        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash, admin=admin, online=online)
+        sql_cmd = sql_cmd.format(username=username, hashed = phash, admin=admin, online=online)
         self.execute(sql_cmd)
 
-        # print("a\n")
         self.cur.execute("""
             UPDATE users SET hashed = ? WHERE username=?""", (memoryview(phash).tobytes(),username) )
         self.commit()
@@ -154,7 +129,7 @@ class SQLDatabase():
     def add_additional_user(self, username, password, admin=0, online=0):
         sql_cmd = """
                 INSERT INTO Users
-                VALUES('{username}', '{password}', 'temp', {admin}, {online})
+                VALUES('{username}', 'temp', {admin}, {online})
             """
        
         with open('salt2.txt', mode='rb') as file: # b is important -> binary
@@ -173,8 +148,7 @@ class SQLDatabase():
             f.write(str.encode(username + '\n') )
             f.write(phash2)
         
-        sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash2, admin=admin, online=online)
-        # print(phash2)
+        sql_cmd = sql_cmd.format(username=username, hashed = phash2, admin=admin, online=online)
         self.execute(sql_cmd)
 
         self.cur.execute("""
@@ -203,20 +177,12 @@ class SQLDatabase():
         with open('salt2.txt', mode='rb') as file: # b is important -> binary
             salt2 = file.read()
         
-        # Display columns
-        # print('\nColumns in EMPLOYEE table:')
-        # data=cursor.execute('''SELECT * FROM USERS''')
-        # for column in data:
-        #     print(column)
             
         # Display data
         print('\nData in USER table:')
         data=cursor.execute("""SELECT * FROM USERS WHERE username=?""", (username,))
         for row in data:
-            
-            # print(row[2])
-
-            # print("P\n")     
+    
             input_hash = hashlib.pbkdf2_hmac(
             "sha256",                   # Hash Digest Algorithm
             password.encode("utf-8"),   # Password converted to Bytes
@@ -233,10 +199,7 @@ class SQLDatabase():
             dklen=128                   # Get a 128 byte hash/key 
             )
 
-
-            # print(input_hash)
-
-            if (input_hash == row[2] or input_hash2 == row[2]):
+            if (input_hash == row[1] or input_hash2 == row[1]):
                 print("SUCCESSLY VERIFIED")
                 conn.commit()
                 conn.close()
@@ -246,9 +209,7 @@ class SQLDatabase():
                 conn.commit()
                 conn.close()
                 return False
-
-
-            print("P\n")            
+          
        
         # Commit your changes in the database    
         conn.commit()
@@ -257,21 +218,7 @@ class SQLDatabase():
         conn.close()
 
         return False
-        
-        # sql_query = """
-        #         SELECT 1 
-        #         FROM Users
-        #         WHERE username = '{username}' AND password = '{password}'
-        #     """
 
-        # sql_query = sql_query.format(username=username, password=password)
-        # self.execute(sql_query)
-
-        # # If our query returns
-        # if self.cur.fetchone():
-        #     return True
-        # else:
-        #     return False
 
     def online(self, username):
         sql_query = """
@@ -309,3 +256,15 @@ class SQLDatabase():
         if r:
             return True
         return False
+
+    def check_online_user(self):
+        sql_query = """
+                SELECT * FROM Users
+                WHERE online = 1
+            """
+
+        sql_query = sql_query.format()
+        self.execute(sql_query)
+        a = self.cur.fetchone()
+        if a:
+            return a
