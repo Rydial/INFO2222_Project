@@ -165,20 +165,35 @@ def get_incoming_controller():
         Serves the message page
     '''
     # print(request.GET.getall('msg'))
+    # a = request.json
+    print("GET")
 
     return model.enter_form()
 
 #-----------------------------------------------------------------------------
+b = None
 
 # Display the message page
 @post('/incoming')
 def post_incoming_controller():
     
-
+    global b
     # Get Decrypted Message from JavaScript
-    a = request.forms.get("msg")
-    print(a)
-    return model.incoming_form("we are in")
+    a = request.json
+    # print(a)
+    print("POST")
+    if (a == None):
+        print(a)
+    else:
+        print(a)
+        b = a
+        
+    if b is None:
+        return model.enter_form()
+
+    else:
+
+        return model.incoming_form(b['pubK'])
 
 #-----------------------------------------------------------------------------
 

@@ -348,15 +348,23 @@ function unpack(base64)
 function displayMessage()
 {
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", "/incoming");
-    let formData = new FormData();
-    formData.append("msg", "This is a test - check.");
-    xmlhttp.send(formData);
+    var req = xmlhttp.open("POST", "/incoming");
+
+    // Set the content type header so bottle knows its json
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+
+    // the data we want to send
+    var data = {
+        pubK : "myPublicKey"
+    };
+
+    // send the data
+    xmlhttp.send(JSON.stringify(data));
 }
 
 /******************************************************************************/
 
-// displayMessage();
+displayMessage();
 
 // localStorage.clear();
 

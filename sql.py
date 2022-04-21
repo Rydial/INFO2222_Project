@@ -271,3 +271,29 @@ class SQLDatabase():
         #     return True
         # else:
         #     return False
+
+    def online(self, username):
+        sql_query = """
+                UPDATE Users SET online = 1
+                WHERE username = '{username}'
+            """
+
+        sql_query = sql_query.format(username=username)
+
+        self.execute(sql_query)
+        self.commit()
+        print("user now online")
+        return True
+
+    def offline(self):
+        sql_query = """
+                UPDATE Users SET login = 0
+                WHERE login = 1
+            """
+
+        sql_query = sql_query.format()
+
+        self.execute(sql_query)
+        self.commit()
+        print("going offline")
+        return True
