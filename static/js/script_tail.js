@@ -252,7 +252,7 @@ function decryptMessage()
     .then(function(encodedMsg) {
 
         // Retrieve the Sender's Signing Public Key
-        crypto.subtle.importKey(
+        return crypto.subtle.importKey(
             "jwk",
             JSON.parse(localStorage.getItem("signPubK1")),
             {
@@ -280,8 +280,7 @@ function decryptMessage()
                 // Decode the Encoded Message into Plaintext
                 const plaintext = decodeString(encodedMsg);
 
-                // Temporary
-                localStorage.setItem("msg", plaintext);
+                return plaintext;
             }
             else
                 alert("Digital Signature could not be verified!");
@@ -300,8 +299,18 @@ function encodeString(string)
 
 function encryptMessage()
 {
-    // Retrieve Raw Input Message from the Website
+    // Retrieve Raw Input from the Message Form
     var inputMsg = document.getElementById('messageTxt').value;
+    var msgRecipient = document.getElementById('messageRecipient').value;
+
+    // Store Recipient Username
+    localStorage.setItem("receiver", msgRecipient);
+
+    // Store Sender Username
+    if (msgRecipient == 'Danny')
+        localStorage.setItem('sender', 'Michael');
+    else
+        localStorage.setItem('sender', 'Danny');
 
     // Encrypt Input Message
     asyncEncryptMessage(inputMsg);
@@ -328,6 +337,9 @@ function generateKeyPairs()
         console.log(localStorage.getItem("signature"));
 
         console.log(localStorage.getItem("msg"));
+
+        console.log(localStorage.getItem("receiver"));
+        console.log(localStorage.getItem("sender"));
     }
 }
 
@@ -348,18 +360,14 @@ function unpack(base64)
 function displayMessage()
 {
     var xmlhttp = new XMLHttpRequest();
-    var req = xmlhttp.open("POST", "/incoming");
-
-    // Set the content type header so bottle knows its json
-    xmlhttp.setRequestHeader("Content-Type", "application/json");
-
-    // the data we want to send
-    var data = {
-        pubK : "myPublicKey"
-    };
-
-    // send the data
-    xmlhttp.send(JSON.stringify(data));
+    xmlhttp.open("POST", "/incoming");
+    let formData = new FormData();
+    formData.append("sender", localStorage.getItem("sender"));
+    formData.append("receiver", localStorage.getItem("receiver"));
+    decryptMessage().then(function(msg) {
+        formData.append("msg", msg);
+        xmlhttp.send(formData);
+    });
 }
 
 /******************************************************************************/
