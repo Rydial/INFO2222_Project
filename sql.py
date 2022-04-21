@@ -28,8 +28,6 @@ class SQLDatabase():
             try:
                 out = self.cur.execute(string)
             except:
-                print("failed")
-                print(sql_string)
                 pass
         return out
 
@@ -49,7 +47,7 @@ class SQLDatabase():
     
     # Sets up the database
     # Default admin password
-    def database_setup(self, admin_password='a'):
+    def database_setup(self):
 
         # Clear the database if needed
         self.execute("DROP TABLE IF EXISTS Users")
@@ -101,7 +99,6 @@ class SQLDatabase():
 
         with open('salt.txt', mode='rb') as file: # b is important -> binary
             salt = file.read()
-            # print(salt)
 
         # Hash the Password with the generated Salt
         phash = hashlib.pbkdf2_hmac(
@@ -159,12 +156,6 @@ class SQLDatabase():
 
     # Check login credentials
     def check_credentials(self, username, password):
-       
-        print("check\n")
-        print(password)
-        print("check\n")
-
-
 
         conn = sqlite3.connect('users.db')
   
@@ -176,10 +167,7 @@ class SQLDatabase():
 
         with open('salt2.txt', mode='rb') as file: # b is important -> binary
             salt2 = file.read()
-        
-            
-        # Display data
-        print('\nData in USER table:')
+             
         data=cursor.execute("""SELECT * FROM USERS WHERE username=?""", (username,))
         for row in data:
     
@@ -200,16 +188,13 @@ class SQLDatabase():
             )
 
             if (input_hash == row[1] or input_hash2 == row[1]):
-                print("SUCCESSLY VERIFIED")
                 conn.commit()
                 conn.close()
                 return True
             else:
-                print("NOT VERIFIED")
                 conn.commit()
                 conn.close()
                 return False
-          
        
         # Commit your changes in the database    
         conn.commit()
