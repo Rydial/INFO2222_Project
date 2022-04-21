@@ -77,7 +77,7 @@ def register_success(name, pwd, pwd2):
     if pwd != pwd2:
         return page_view("register", reason="Passwords are not the same, please try again")
 
-    if sql.add_user(name, pwd , phash , admin=1) == True:
+    if sql.add_user(name, pwd , admin=1) == True:
         print("in")
 
         print("hi")
@@ -95,7 +95,18 @@ def incoming_form(decrypted):
         message_form
         Returns the view for the message_form
     '''
+    # return page_view("incoming", list_of_regions=[('where'),('what')])
     return page_view("incoming", msg=decrypted)
+
+
+
+def enter_form():
+    '''
+        message_form
+        Returns the view for the message_form
+    '''
+    # return page_view("incoming", list_of_regions=[('where'),('what')])
+    return page_view("enter")
 
 #-----------------------------------------------------------------------------
 # Public Key

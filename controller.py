@@ -8,6 +8,8 @@ from bottle import route, get, post, error, request, static_file
 
 import model
 import sql
+from flask import Flask, render_template
+
 
 sql = sql.SQLDatabase("users.db")
 sql.database_setup()
@@ -84,6 +86,11 @@ def get_public_key():
     '''
         Gets public key from client
     '''
+    print(request.json)
+    print ("AAA\n\n")
+    print(request.json)
+
+    return model.publickey_extract(request.json)
     # print(request.forms.get('pk1'))
     # print(request.forms.get('pk2'))
 
@@ -122,6 +129,7 @@ def post_register_controller():
 
     publicKey = request.json
     print(publicKey)
+    print("99\n")
     # Call the appropriate method
     return model.register_success(username, pwd, pwd2)
 
@@ -156,7 +164,9 @@ def get_incoming_controller():
         
         Serves the message page
     '''
-    return model.incoming_form(request.forms.get('msg'))
+    # print(request.GET.getall('msg'))
+
+    return model.enter_form()
 
 #-----------------------------------------------------------------------------
 
@@ -166,9 +176,9 @@ def post_incoming_controller():
     
 
     # Get Decrypted Message from JavaScript
-    print(request.forms.get('msg'))
-
-    return model.incoming_form(request.forms.get('msg'))
+    a = request.forms.get("msg")
+    print(a)
+    return model.incoming_form("we are in")
 
 #-----------------------------------------------------------------------------
 

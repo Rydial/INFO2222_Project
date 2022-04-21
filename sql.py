@@ -101,10 +101,10 @@ class SQLDatabase():
         self.add_user('a', 'a', admin=1)
         self.add_additional_user('b', 'b', admin=1)
 
-        print('\nColumns in FRIENDS table:')
-        data=self.execute('''SELECT * FROM friendships''')
-        for column in data:
-            print(column)
+        # print('\nColumns in FRIENDS table:')
+        # data=self.execute('''SELECT * FROM friendships''')
+        # for column in data:
+        #     print(column)
 
 
         # print(hash2)
@@ -173,7 +173,7 @@ class SQLDatabase():
             f.write(phash2)
         
         sql_cmd = sql_cmd.format(username=username, password=password, hashed = phash2, admin=admin)
-        print(phash2)
+        # print(phash2)
         self.execute(sql_cmd)
 
         self.cur.execute("""
@@ -203,19 +203,19 @@ class SQLDatabase():
             salt2 = file.read()
         
         # Display columns
-        print('\nColumns in EMPLOYEE table:')
-        data=cursor.execute('''SELECT * FROM USERS''')
-        for column in data:
-            print(column)
+        # print('\nColumns in EMPLOYEE table:')
+        # data=cursor.execute('''SELECT * FROM USERS''')
+        # for column in data:
+        #     print(column)
             
         # Display data
         print('\nData in USER table:')
         data=cursor.execute("""SELECT * FROM USERS WHERE username=?""", (username,))
         for row in data:
             
-            print(row[2])
+            # print(row[2])
 
-            print("P\n")     
+            # print("P\n")     
             input_hash = hashlib.pbkdf2_hmac(
             "sha256",                   # Hash Digest Algorithm
             password.encode("utf-8"),   # Password converted to Bytes
@@ -233,7 +233,7 @@ class SQLDatabase():
             )
 
 
-            print(input_hash)
+            # print(input_hash)
 
             if (input_hash == row[2] or input_hash2 == row[2]):
                 print("SUCCESSLY VERIFIED")
