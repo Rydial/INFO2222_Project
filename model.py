@@ -8,15 +8,8 @@
 import view
 import random
 import hashlib
-# from no_sql_db import database
-import sql
+from no_sql_db import database
 import json
-
-# Initialise our views, all arguments are defaults for the template
-page_view = view.View()
-sql = sql.SQLDatabase("users.db")
-sql.database_setup()
-
 
 #-----------------------------------------------------------------------------
 # Index
@@ -61,8 +54,7 @@ def register_success(name, pwd, pwd2):
 
     with open('salt.txt', mode='rb') as file: # b is important -> binary
         salt = file.read()
-        # print(salt)
-    # salt = os.urandom(32)
+
 
 
     # Hash the Password with the generated Salt
@@ -74,13 +66,10 @@ def register_success(name, pwd, pwd2):
         dklen=128                   # Get a 128 byte hash/key 
     )
 
-    print(name)
-    print(pwd)
-
     if pwd != pwd2:
         return page_view("register", reason="Passwords are not the same, please try again")
 
-    if sql.add_user(name, pwd , admin=1) == True:
+    if sql.add_user(name, pwd , admin=1, online=0) == True:
      
 
         return page_view("register_success")
@@ -96,19 +85,15 @@ def incoming_form(msg, sender, receiver):
         message_form
         Returns the view for the message_form
     '''
-    # return page_view("incoming", list_of_regions=[('where'),('what')])
     if(sql.check_online()):
         a = sql.check_online_user()
-        # print(receiver)
-        # print(a[0])
+
         if (receiver == a[0]):
             return page_view("incoming", msg=msg, sender=sender)
         else:
             return page_view("no_message")
     else:
         return page_view("not_loggedin")
-
-    # return page_view("incoming", msg=msg, sender=sender)
 
 
 
@@ -117,7 +102,6 @@ def enter_form():
         message_form
         Returns the view for the message_form
     '''
-    # return page_view("incoming", list_of_regions=[('where'),('what')])
     return page_view("enter")
 
 #-----------------------------------------------------------------------------
@@ -129,10 +113,6 @@ def publickey_extract(pk_json):
         index
         Returns the view for the index
     '''
-
-    print(pk_json)
-
-    print(pk_json['n'])
 
     return page_view("index")
 
@@ -175,19 +155,13 @@ def login_check(username, password):
     #     login = False
 
     if sql.check_credentials(username, password) == False:
-        print("AAAAAZZZZ")
         err_str = "Incorrect Username or Passwod"
         login = False
         
     if login: 
-        global current_user
-        current_user = username
-        print(current_user)
-        print("wtafa")
         sql.online(username)
         return page_view("valid", name=username)
     else:
-        print(err_str)
         return page_view("invalid", reason=err_str)
 
 #-----------------------------------------------------------------------------

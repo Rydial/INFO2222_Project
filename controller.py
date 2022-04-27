@@ -7,11 +7,6 @@
 from bottle import route, get, post, error, request, static_file
 
 import model
-import sql
-
-
-sql = sql.SQLDatabase("users.db")
-sql.database_setup()
 
 #-----------------------------------------------------------------------------
 # Static file paths
@@ -85,13 +80,9 @@ def get_public_key():
     '''
         Gets public key from client
     '''
-    print(request.json)
-    print ("AAA\n\n")
-    print(request.json)
 
     return model.publickey_extract(request.json)
-    # print(request.forms.get('pk1'))
-    # print(request.forms.get('pk2'))
+    
 
 #-----------------------------------------------------------------------------
 
@@ -126,22 +117,10 @@ def post_register_controller():
     pwd = request.forms.get("pwd")
     pwd2 = request.forms.get("pwd2")
 
-    publicKey = request.json
-    print(publicKey)
-    print("99\n")
     # Call the appropriate method
     return model.register_success(username, pwd, pwd2)
 
 #-----------------------------------------------------------------------------
-
-@post("/incoming_messaage")
-def post_incoming_message_controller():
-
-    # 
-
-    return # page_view()
-    pass
-
 #-----------------------------------------------------------------------------
 
 # Display the message page
@@ -163,9 +142,7 @@ def get_incoming_controller():
         
         Serves the message page
     '''
-    # print(request.GET.getall('msg'))
-    # a = request.json
-    print("GET")
+
 
     return model.enter_form()
 
@@ -181,12 +158,10 @@ def post_incoming_controller():
 
     # Get Decrypted Message from JavaScript
     a = request.json
-    # print(a)
-    print("POST")
+
     if (a == None):
-        print(a)
+        pass
     else:
-        print(a)
         b = a
         
     if b is None:

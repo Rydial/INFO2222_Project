@@ -1,12 +1,5 @@
-# This file provides a very simple "no sql database using python dictionaries"
-# If you don't know SQL then you might consider something like this for this course
-# We're not using a class here as we're roughly expecting this to be a singleton
-
-# If you need to multithread this, a cheap and easy way is to stick it on its own bottle server on a different port
-# Write a few dispatch methods and add routes
-
-# A heads up, this code is for demonstration purposes; you might want to modify it for your own needs
-# Currently it does basic insertions and lookups
+import os
+import hashlib
 
 class Table():
     def __init__(self, table_name, *table_fields):
@@ -43,12 +36,11 @@ class Table():
 
 
 class DB():
-    '''
-    This is a singleton class that handles all the tables
-    You'll probably want to extend this with features like multiple lookups, and deletion
-    A method to write to and load from file might also be useful for your purposes
-    '''
+
+    '''                          Init-Stage Methods                          '''
+
     def __init__(self):
+        # Initialize Member Variables
         self.tables = {}
 
         # Read Data from Database CSV File
@@ -56,47 +48,107 @@ class DB():
         
         return
     
-    def read_database(self):
 
+    def read_database(self):
         # Open the Database CSV File (Closes Automatically)
         with open("database.csv", "a+") as file:
 
             # Create a new Table Entry "users" in the Database
-            self.add_table("users", "username", "password")
+            self.add_table("users",
+                "username",
+                "password",
+                "salt",
+                "admin",
+                "loggedIn"
+            )
 
             # Set File Pointer to the Beginning of the File
             file.seek(0)
 
-            # Create each 'entry' into the "users" Table
+            # Add each 'entry' into the "users" Table
             for entry in file.readlines():
                 self.create_table_entry("users", entry.strip().split(","))
 
         return
 
+    '''                            Class Methods                             '''
+
     def add_table(self, table_name, *table_fields):
-        '''
-            Adds a table to the database
-        '''
-        
         table = Table(table_name, *table_fields)
         self.tables[table_name] = table
 
         return
 
 
-    def search_table(self, table_name, target_field_name, target_value):
-        '''
-            Calls the search table method on an appropriate table
-        '''
-        return self.tables[table_name].search_table(target_field_name, target_value)
+    def add_user(self, username, password, admin=0, online=0):
+
+        # Generate a random salt with a length of 32 bytes
+        salt = os.urandom(32)
+
+        # Hash the Password with the generated Salt
+        hash = hashlib.pbkdf2_hmac(
+            "sha256",                   # Hash Digest Algorithm
+            password.encode("utf-8"),   # Password converted to Bytes
+            salt,                       # Salt
+            100000,                     # 100,000 iterations of SHA-256
+            dklen=128                   # Get a 128 byte hash/key 
+        )
+
+        # Add User as a new entry to the 'users' table
+        self.create_table_entry("users", [username, hash, salt, admin, online])
+
+        return
+
+
+    def check_credentials(self, username, password):
+
+        # Retrieve User's Table Entry
+        user = self.search_table("users", "username", username)
+
+        # Hash the Input Password with the stored Salt
+        input_hash = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            user[2],
+            100000,
+            dklen=128)
+        
+        # Check Username and Password Validity
+        if user is not None:
+            if input_hash == user[1]:
+                return True
+
+        return False
+
+
+    def check_online(self): # ???
+
+
+
+        return
+
 
     def create_table_entry(self, table_name, data):
-        '''
-            Calls the create entry method on the appropriate table
-        '''
         return self.tables[table_name].create_entry(data)
 
 
-# Our global database
-# Invoke this as needed
+    def offline(self):
+
+
+
+        return
+
+
+    def online(self, username):
+
+        
+
+        return
+
+
+    def search_table(self, table_name, target_field_name, target_value):
+        return self.tables[table_name].search_table(target_field_name, target_value)
+
+
+# Our global database, Invoke this as needed
 database = DB()
